@@ -8,6 +8,7 @@
   "icon": "intentionality.img",
   "tags": "clock,mindfulness,activity,productivity",
   "allow_emulator": true,
+  "supports": ["BANGLEJS2"],
   "storage": [
     {"name": "intentionality.app.js", "url": "intentionality.app.js"},
     {"name": "intentionality.img", "url": "intentionality.img"}
