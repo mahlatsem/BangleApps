@@ -1,0 +1,15 @@
+{
+  "id": "intentionality",
+  "name": "Intentionality Watch",
+  "type": "clock",
+  "src": "intentionality.app.js",
+  "version": "1.0",
+  "description": "Focus on what you need to be doing right now without distractions",
+  "icon": "intentionality.img",
+  "tags": "clock,mindfulness,activity,productivity",
+  "allow_emulator": true,
+  "storage": [
+    {"name": "intentionality.app.js", "url": "intentionality.app.js"},
+    {"name": "intentionality.img", "url": "intentionality.img"}
+  ]
+}
