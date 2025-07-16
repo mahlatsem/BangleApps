@@ -2,7 +2,7 @@
   "id": "intentionality",
   "name": "Intentionality Watch",
   "type": "clock",
-  "src": "intentionality.app.js",
+  "src": "app.js",
   "version": "1.0",
   "description": "Focus on what you need to be doing right now without distractions",
   "icon": "intentionality.img",
@@ -10,7 +10,7 @@
   "allow_emulator": true,
   "supports": ["BANGLEJS2"],
   "storage": [
-    {"name": "intentionality.app.js", "url": "intentionality.app.js"},
+    {"name": "app.js", "url": "app.js"},
     {"name": "intentionality.img", "url": "intentionality.img"}
   ]
 }
