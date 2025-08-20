@@ -1,0 +1,187 @@
+{
+  "actions": [
+    {
+      "name": "TEST 1",
+      "category": "test",
+      "startTime": 1755726845074,
+      "endTime": 1755726905074
+    },
+    {
+      "name": "TEST 2",
+      "category": "test",
+      "startTime": 1755726905074,
+      "endTime": 1755726965074
+    },
+    {
+      "name": "TEST 3",
+      "category": "test",
+      "startTime": 1755726965074,
+      "endTime": 1755727025074
+    },
+    {
+      "name": "TEST 4",
+      "category": "test",
+      "startTime": 1755727025074,
+      "endTime": 1755727085074
+    },
+    {
+      "name": "TEST 5",
+      "category": "test",
+      "startTime": 1755727085074,
+      "endTime": 1755727145074
+    },
+    {
+      "name": "TEST 6",
+      "category": "test",
+      "startTime": 1755727145074,
+      "endTime": 1755727205074
+    },
+    {
+      "name": "TEST 7",
+      "category": "test",
+      "startTime": 1755727205074,
+      "endTime": 1755727265074
+    },
+    {
+      "name": "TEST 8",
+      "category": "test",
+      "startTime": 1755727265074,
+      "endTime": 1755727325074
+    },
+    {
+      "name": "TEST 9",
+      "category": "test",
+      "startTime": 1755727325074,
+      "endTime": 1755727385074
+    },
+    {
+      "name": "TEST 10",
+      "category": "test",
+      "startTime": 1755727385074,
+      "endTime": 1755727445074
+    },
+    {
+      "name": "TEST 11",
+      "category": "test",
+      "startTime": 1755727445074,
+      "endTime": 1755727505074
+    },
+    {
+      "name": "TEST 12",
+      "category": "test",
+      "startTime": 1755727505074,
+      "endTime": 1755727565074
+    },
+    {
+      "name": "TEST 13",
+      "category": "test",
+      "startTime": 1755727565074,
+      "endTime": 1755727625074
+    },
+    {
+      "name": "TEST 14",
+      "category": "test",
+      "startTime": 1755727625074,
+      "endTime": 1755727685074
+    },
+    {
+      "name": "TEST 15",
+      "category": "test",
+      "startTime": 1755727685074,
+      "endTime": 1755727745074
+    },
+    {
+      "name": "TEST 16",
+      "category": "test",
+      "startTime": 1755727745074,
+      "endTime": 1755727805074
+    },
+    {
+      "name": "TEST 17",
+      "category": "test",
+      "startTime": 1755727805074,
+      "endTime": 1755727865074
+    },
+    {
+      "name": "TEST 18",
+      "category": "test",
+      "startTime": 1755727865074,
+      "endTime": 1755727925074
+    },
+    {
+      "name": "TEST 19",
+      "category": "test",
+      "startTime": 1755727925074,
+      "endTime": 1755727985074
+    },
+    {
+      "name": "TEST 20",
+      "category": "test",
+      "startTime": 1755727985074,
+      "endTime": 1755728045074
+    },
+    {
+      "name": "TEST 21",
+      "category": "test",
+      "startTime": 1755728045074,
+      "endTime": 1755728105074
+    },
+    {
+      "name": "TEST 22",
+      "category": "test",
+      "startTime": 1755728105074,
+      "endTime": 1755728165074
+    },
+    {
+      "name": "TEST 23",
+      "category": "test",
+      "startTime": 1755728165074,
+      "endTime": 1755728225074
+    },
+    {
+      "name": "TEST 24",
+      "category": "test",
+      "startTime": 1755728225074,
+      "endTime": 1755728285074
+    },
+    {
+      "name": "TEST 25",
+      "category": "test",
+      "startTime": 1755728285074,
+      "endTime": 1755728345074
+    },
+    {
+      "name": "TEST 26",
+      "category": "test",
+      "startTime": 1755728345074,
+      "endTime": 1755728405074
+    },
+    {
+      "name": "TEST 27",
+      "category": "test",
+      "startTime": 1755728405074,
+      "endTime": 1755728465074
+    },
+    {
+      "name": "TEST 28",
+      "category": "test",
+      "startTime": 1755728465074,
+      "endTime": 1755728525074
+    },
+    {
+      "name": "TEST 29",
+      "category": "test",
+      "startTime": 1755728525074,
+      "endTime": 1755728585074
+    },
+    {
+      "name": "TEST 30",
+      "category": "test",
+      "startTime": 1755728585074,
+      "endTime": 1755728645074
+    }
+  ],
+  "lifePercentage": 58.73,
+  "promptTimeout": 10000,
+  "repromptInterval": 30000
+}

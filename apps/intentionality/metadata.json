@@ -1,0 +1,17 @@
+{
+  "id": "intentionality",
+  "name": "Intentionality Watch",
+  "type": "clock",
+  "src": "app.js",
+  "version": "0.01",
+  "description": "Focus on what you need to be doing right now without distractions",
+  "icon": "icon.png",
+  "tags": "clock,mindfulness,action,productivity",
+  "allow_emulator": true,
+  "supports": ["BANGLEJS2"],
+  "storage": [
+    {"name": "intentionality.app.js", "url": "app.js"},
+    {"name": "generate-test-data.js", "url": "generate-test-data.js"},
+    {"name": "intentionality-test.json", "url": "intentionality-test.json"}
+  ]
+}

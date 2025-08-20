@@ -1,0 +1,19 @@
+{
+  "actions": [
+    {
+      "name": "TEST ACTION",
+      "category": "test",
+      "startTime": 1703980800000,
+      "endTime": 1703984400000
+    },
+    {
+      "name": "OVERLAY TEST",
+      "category": "testing",
+      "startTime": 1703984400000,
+      "endTime": 1703988000000
+    }
+  ],
+  "lifePercentage": 58.73,
+  "promptTimeout": 10000,
+  "repromptInterval": 30000
+}

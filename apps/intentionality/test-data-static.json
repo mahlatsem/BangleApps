@@ -1,0 +1,25 @@
+{
+  "actions": [
+    {
+      "name": "TEST 1",
+      "category": "test",
+      "startTime": 1703980800000,
+      "endTime": 1703980860000
+    },
+    {
+      "name": "TEST 2", 
+      "category": "test",
+      "startTime": 1703980860000,
+      "endTime": 1703980920000
+    },
+    {
+      "name": "TEST 3",
+      "category": "test", 
+      "startTime": 1703980920000,
+      "endTime": 1703980980000
+    }
+  ],
+  "lifePercentage": 58.73,
+  "promptTimeout": 10000,
+  "repromptInterval": 30000
+}
