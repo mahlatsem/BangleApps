@@ -29,6 +29,9 @@ function generateTestData() {
   // Save to test storage file
   require("Storage").writeJSON("intentionality-test.json", testData);
   
+  console.log("✅ Generated test data for current time");
+  console.log("First action starts at:", new Date(actions[0].startTime));
+  console.log("Last action starts at:", new Date(actions[29].startTime));
   
   return testData;
 }

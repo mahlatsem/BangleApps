@@ -1,3 +1,4 @@
+{
 // Constants
 const BATTERY_WIDTH = 28;
 const BATTERY_HEIGHT = 14;
@@ -40,8 +41,8 @@ const BATTERY_UPDATE_INTERVAL = 300000;
 const CLOCK_UPDATE_INTERVAL = 60000;
 
 // Button constants
-const BUTTON_WIDTH = 50;
-const BUTTON_HEIGHT = 30;
+const BUTTON_WIDTH = 40;
+const BUTTON_HEIGHT = 20;
 
 // Error handling
 function logError(operation, error) {
@@ -53,7 +54,9 @@ let currentCategory = DEFAULT_CATEGORY;
 let lifePercentage = 58.73;
 let batteryDays = 23;
 let showingOverlay = false;
-let vibrationTimer = null;
+let overlayTimeout = null;
+let repromptTimer = null;
+let actionCheckTimer = null;
 
 let yesButton = {};
 let noButton = {};
@@ -97,6 +100,7 @@ function loadActionData() {
     logError("Storage read", e);
   }
   
+  console.log("Using default configuration");
   return defaultData;
 }
 
@@ -110,6 +114,7 @@ function updateActionData() {
       eval(require("Storage").read("generate-test-data.js"));
       generateTestData();
       newData = loadActionData(); // Reload fresh data
+      console.log("Auto-regenerated expired test data");
     } catch (e) {
       logError("Test data auto-regeneration", e);
     }
@@ -132,12 +137,6 @@ function updateActionData() {
     } catch (e) {
       logError("Action change buzz", e);
     }
-    
-    // If overlay is already showing, hide it first to update with new action
-    if (showingOverlay) {
-      hideActionConfirmation(true); // Skip reprompt since we're showing new action
-    }
-    
     showActionConfirmation(currentActionInfo.action);
   }
   
@@ -164,6 +163,22 @@ function getCurrentAction(actions, currentTime) {
   };
 }
 
+function saveUserResponse(confirmed) {
+  const MAX_STORED_RESPONSES = 100;
+  
+  try {
+    const responses = Storage.readJSON("responses.json", true) || [];
+    responses.push({
+      timestamp: Date.now(),
+      action: currentAction,
+      confirmed: confirmed
+    });
+    if (responses.length > MAX_STORED_RESPONSES) responses.shift();
+    Storage.writeJSON("responses.json", responses);
+  } catch (e) {
+    logError("Response save", e);
+  }
+}
 
 function drawHourglassIcon(x, y, lifePercentage) {
   const w = HOURGLASS_SIZE;
@@ -284,8 +299,8 @@ function drawWatchFace() {
 }
 
 function drawOverlayBackground(centerX) {
-  const OVERLAY_MARGIN = 12;
-  const OVERLAY_HEIGHT = 85; // Increased from 60 to accommodate larger buttons + proper spacing
+  const OVERLAY_MARGIN = 5;
+  const OVERLAY_HEIGHT = 60;
   const OVERLAY_Y_POSITION = 50;
   
   const screenWidth = g.getWidth();
@@ -342,7 +357,6 @@ function drawConfirmationButtons(centerX) {
   yesButton = {x1: yesButtonX, y1: buttonY, x2: yesButtonX + buttonWidth, y2: buttonY + buttonHeight};
   noButton = {x1: noButtonX, y1: buttonY, x2: noButtonX + buttonWidth, y2: buttonY + buttonHeight};
   
-  
   drawButton(yesButtonX, buttonY, buttonWidth, buttonHeight, "YES");
   drawButton(noButtonX, buttonY, buttonWidth, buttonHeight, "NO");
 }
@@ -352,16 +366,6 @@ function showActionConfirmation(actionName) {
   
   showingOverlay = true;
   
-  // Unlock device to enable touch interaction
-  try {
-    Bangle.setLocked(false);
-  } catch (e) {
-    logError("Device unlock", e);
-  }
-  
-  // Keep screen awake with periodic wakes instead of timeout changes
-  Bangle.setLCDPower(true);
-  
   const screenWidth = g.getWidth();
   const centerX = screenWidth / 2;
   
@@ -369,142 +373,89 @@ function showActionConfirmation(actionName) {
   drawQuestionText(centerX, actionName || currentAction);
   drawConfirmationButtons(centerX);
   
-  if (vibrationTimer) clearTimeout(vibrationTimer);
+  if (overlayTimeout) clearTimeout(overlayTimeout);
   const actionData = loadActionData();
   const timeout = actionData.promptTimeout || defaultData.promptTimeout;
-  
-  // Start vibration reminder system and periodic screen wake
-  function vibrationReminder() {
-    if (showingOverlay) {
-      try {
-        Bangle.buzz(200); // Short vibration reminder
-        Bangle.setLCDPower(true); // Wake screen again without changing timeout
-        
-        // Re-unlock device to ensure it stays unlocked during screen refresh
-        Bangle.setLocked(false);
-      } catch (e) {
-        logError("Vibration reminder", e);
-      }
-      // Schedule next vibration and screen wake
-      vibrationTimer = setTimeout(vibrationReminder, timeout);
-    }
-  }
-  
-  // Start first vibration reminder
-  vibrationTimer = setTimeout(vibrationReminder, timeout);
+  overlayTimeout = setTimeout(() => {
+    hideActionConfirmation();
+  }, timeout);
 }
 
-function hideActionConfirmation(skipReprompt) {
+function hideActionConfirmation() {
   if (!showingOverlay) return;
   
   showingOverlay = false;
-  if (vibrationTimer) {
-    clearTimeout(vibrationTimer);
-    vibrationTimer = null;
+  if (overlayTimeout) {
+    clearTimeout(overlayTimeout);
+    overlayTimeout = null;
   }
-  
   
   drawWatchFace();
-  if (!skipReprompt) {
-    scheduleReprompt();
+  scheduleReprompt();
+}
+
+function scheduleReprompt() {
+  if (repromptTimer) clearTimeout(repromptTimer);
+  
+  const actionData = updateActionData();
+  repromptTimer = setTimeout(() => {
+    if (!showingOverlay && currentAction !== DEFAULT_ACTION) {
+      showActionConfirmation();
+    }
+  }, actionData.repromptInterval || defaultData.repromptInterval);
+}
+
+function scheduleNextActionCheck() {
+  // Clear any existing timer
+  if (actionCheckTimer) {
+    clearTimeout(actionCheckTimer);
+    actionCheckTimer = null;
   }
   
-  // Re-lock device to return to normal watch behavior
-  try {
-    Bangle.setLocked(true);
-  } catch (e) {
-    logError("Device re-lock", e);
+  const now = Date.now();
+  const data = loadActionData();
+  
+  if (!data.actions || data.actions.length === 0) {
+    return; // No actions to schedule
+  }
+  
+  // Find current active action
+  const currentAction = data.actions.find(a => now >= a.startTime && now <= a.endTime);
+  
+  let nextCheckTime = null;
+  
+  if (currentAction) {
+    // Case 1: Active action exists - check when it ends
+    nextCheckTime = currentAction.endTime + 1000; // +1 sec buffer
+  } else {
+    // Case 2: No active action - find next upcoming action
+    const nextAction = data.actions.find(a => a.startTime > now);
+    if (nextAction) {
+      nextCheckTime = nextAction.startTime + 1000; // +1 sec buffer
+    }
+  }
+  
+  if (nextCheckTime) {
+    const delay = nextCheckTime - now;
+    if (delay > 0 && delay < 3600000) { // Only schedule if within 1 hour
+      actionCheckTimer = setTimeout(() => {
+        updateActionData();
+        if (!showingOverlay) drawWatchFace();
+        scheduleNextActionCheck(); // Schedule the next check
+      }, delay);
+    }
   }
 }
 
-const scheduleReprompt = (function() {
-  let repromptTimer = null;
-  
-  return function() {
-    if (repromptTimer) clearTimeout(repromptTimer);
-    
-    const actionData = updateActionData();
-    repromptTimer = setTimeout(() => {
-      if (!showingOverlay && currentAction !== DEFAULT_ACTION) {
-        showActionConfirmation();
-      }
-    }, actionData.repromptInterval || defaultData.repromptInterval);
-  };
-})();
-
-const scheduleNextActionCheck = (function() {
-  let actionCheckTimer = null;
-  
-  return function() {
-    // Clear any existing timer
-    if (actionCheckTimer) {
-      clearTimeout(actionCheckTimer);
-      actionCheckTimer = null;
-    }
-    
-    const now = Date.now();
-    const data = loadActionData();
-    
-    if (!data.actions || data.actions.length === 0) {
-      return; // No actions to schedule
-    }
-    
-    // Find current active action
-    const currentAction = data.actions.find(a => now >= a.startTime && now <= a.endTime);
-    
-    let nextCheckTime = null;
-    
-    if (currentAction) {
-      // Case 1: Active action exists - check when it ends
-      nextCheckTime = currentAction.endTime + 1000; // +1 sec buffer
-    } else {
-      // Case 2: No active action - find next upcoming action
-      const nextAction = data.actions.find(a => a.startTime > now);
-      if (nextAction) {
-        nextCheckTime = nextAction.startTime + 1000; // +1 sec buffer
-      }
-    }
-    
-    if (nextCheckTime) {
-      const delay = nextCheckTime - now;
-      if (delay > 0 && delay < 3600000) { // Only schedule if within 1 hour
-        actionCheckTimer = setTimeout(() => {
-          updateActionData();
-          if (!showingOverlay) drawWatchFace();
-          scheduleNextActionCheck(); // Schedule the next check
-        }, delay);
-      }
-    }
-  };
-})();
-
 function handleTouch(_, xy) {
-  if (!showingOverlay) {
-    return;
-  }
+  if (!showingOverlay) return;
   
-  // Process initial touch events (xy.type == 0) for immediate button response
-  if (xy.type !== 0) {
-    return;
-  }
-  
-  // Validate touch coordinates are within screen bounds
-  const screenWidth = g.getWidth();
-  const screenHeight = g.getHeight();
-  if (xy.x < 0 || xy.x >= screenWidth || xy.y < 0 || xy.y >= screenHeight) {
-    return;
-  }
-  
-  
-  
-  // Check YES button hit
-  const yesHit = (xy.x >= yesButton.x1 && xy.x <= yesButton.x2 && xy.y >= yesButton.y1 && xy.y <= yesButton.y2);
-  
-  if (yesHit) {
+  if (xy.x >= yesButton.x1 && xy.x <= yesButton.x2 && xy.y >= yesButton.y1 && xy.y <= yesButton.y2) {
     try {
       drawButtonPressed(yesButton.x1, yesButton.y1, BUTTON_WIDTH, BUTTON_HEIGHT, "YES");
       setTimeout(() => {
-        hideActionConfirmation(true); // Skip reprompt on YES
+        saveUserResponse(true);
+        hideActionConfirmation();
       }, 150);
     } catch (e) {
       logError("Yes button press", e);
@@ -512,21 +463,20 @@ function handleTouch(_, xy) {
     return;
   }
   
-  // Check NO button hit
-  const noHit = (xy.x >= noButton.x1 && xy.x <= noButton.x2 && xy.y >= noButton.y1 && xy.y <= noButton.y2);
-  
-  if (noHit) {
+  if (xy.x >= noButton.x1 && xy.x <= noButton.x2 && xy.y >= noButton.y1 && xy.y <= noButton.y2) {
     try {
       drawButtonPressed(noButton.x1, noButton.y1, BUTTON_WIDTH, BUTTON_HEIGHT, "NO");
       setTimeout(() => {
-        hideActionConfirmation(false);
+        saveUserResponse(false);
+        currentAction = DEFAULT_ACTION;
+        currentCategory = DEFAULT_CATEGORY;
+        hideActionConfirmation();
       }, 150);
     } catch (e) {
       logError("No button press", e);
     }
     return;
   }
-  
 }
 
 function init() {
@@ -595,3 +545,5 @@ function init() {
 }
 
 init();
+
+} // End block scope
