@@ -10,8 +10,6 @@
   "allow_emulator": true,
   "supports": ["BANGLEJS2"],
   "storage": [
-    {"name": "intentionality.app.js", "url": "app.js"},
-    {"name": "generate-test-data.js", "url": "generate-test-data.js"},
-    {"name": "intentionality-test.json", "url": "intentionality-test.json"}
+    {"name": "intentionality.app.js", "url": "app.js"}
   ]
 }
